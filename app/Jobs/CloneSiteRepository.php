@@ -29,11 +29,13 @@ class CloneSiteRepository implements ShouldQueue
             'project_type' => $detected['project_type'],
             'build_command' => $detected['build_command'],
             'build_output_dir' => $detected['build_output_dir'],
-            'status' => 'ready',
+            'status' => 'synced',
             'last_synced_at' => now(),
             'meta' => [
                 'last_commit' => $gitSyncService->currentCommit($repoPath),
             ],
         ]);
+
+        ParseSiteContent::dispatch($site->id);
     }
 }

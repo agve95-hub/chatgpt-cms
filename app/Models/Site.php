@@ -46,4 +46,9 @@ class Site extends Model
     {
         return $this->hasMany(Deploy::class);
     }
+
+    public function pages(): HasMany
+    {
+        return $this->hasMany(Page::class);
+    }
 }
