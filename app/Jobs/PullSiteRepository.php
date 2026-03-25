@@ -29,8 +29,11 @@ class PullSiteRepository implements ShouldQueue
         $meta['last_commit'] = $gitSyncService->currentCommit($site->local_repo_path);
 
         $site->update([
+            'status' => 'synced',
             'last_synced_at' => now(),
             'meta' => $meta,
         ]);
+
+        ParseSiteContent::dispatch($site->id);
     }
 }
