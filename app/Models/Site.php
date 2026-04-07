@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\RepoUrlNormalizer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,6 +39,16 @@ class Site extends Model
         static::creating(function (Site $site): void {
             if (blank($site->slug)) {
                 $site->slug = Str::slug($site->name);
+            }
+
+            if (filled($site->repo_url)) {
+                $site->repo_url = app(RepoUrlNormalizer::class)->normalize($site->repo_url);
+            }
+        });
+
+        static::updating(function (Site $site): void {
+            if ($site->isDirty('repo_url') && filled($site->repo_url)) {
+                $site->repo_url = app(RepoUrlNormalizer::class)->normalize($site->repo_url);
             }
         });
     }
