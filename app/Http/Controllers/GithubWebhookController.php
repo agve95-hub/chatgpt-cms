@@ -5,12 +5,17 @@ namespace App\Http\Controllers;
 use App\Jobs\PullSiteRepository;
 use App\Models\Site;
 use App\Models\WebhookEvent;
+use App\Services\RepoUrlNormalizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class GithubWebhookController extends Controller
 {
+    public function __construct(private readonly RepoUrlNormalizer $repoUrlNormalizer)
+    {
+    }
+
     public function __invoke(Request $request): JsonResponse
     {
         $signature = (string) $request->header('X-Hub-Signature-256');
@@ -21,7 +26,7 @@ class GithubWebhookController extends Controller
         abort_unless($this->hasValidSignature($signature, $payload), Response::HTTP_UNAUTHORIZED);
 
         $decoded = $request->json()->all();
-        $repoUrl = data_get($decoded, 'repository.html_url');
+        $repoUrl = $this->repoUrlNormalizer->normalize((string) data_get($decoded, 'repository.html_url', ''));
 
         WebhookEvent::create([
             'provider' => 'github',
